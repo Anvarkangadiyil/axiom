@@ -1,0 +1,47 @@
+"use client";
+
+import { ReactNode } from "react";
+import { AuthLoading, ConvexReactClient } from "convex/react";
+import { ConvexProviderWithClerk } from "convex/react-clerk";
+import {
+  ClerkProvider,
+  SignInButton,
+  SignUpButton,
+  useAuth,
+  UserButton,
+} from "@clerk/nextjs";
+import { ThemeProvider } from "./theme-provider";
+import { Authenticated, Unauthenticated } from "convex/react";
+import { UnAuthenticatedView } from "@/features/components/auth/unauthenticated-view";
+import AuthLoadingView from "@/features/components/auth/auth-loading-view";
+if (!process.env.NEXT_PUBLIC_CONVEX_URL) {
+  throw new Error("Missing NEXT_PUBLIC_CONVEX_URL in your .env file");
+}
+
+const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL);
+
+export default function Providers({ children }: { children: ReactNode }) {
+  return (
+    <ClerkProvider>
+      <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Authenticated>
+            <UserButton />
+            {children}
+          </Authenticated>
+          <Unauthenticated>
+            <UnAuthenticatedView />
+          </Unauthenticated>
+          <AuthLoading>
+            <AuthLoadingView />
+          </AuthLoading>
+        </ThemeProvider>
+      </ConvexProviderWithClerk>
+    </ClerkProvider>
+  );
+}
