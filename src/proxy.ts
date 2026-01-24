@@ -3,11 +3,7 @@ import { clerkMiddleware } from "@clerk/nextjs/server";
 //   "/api/inngest(.*)",
 // ])
 
-// export default clerkMiddleware(async (auth, req) => {
-//   if (!isPublicRoute) {
-//     await auth.protect();
-//   }
-// });
+export default clerkMiddleware();
 
 export const config = {
   matcher: [
