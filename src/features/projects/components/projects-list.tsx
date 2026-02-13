@@ -97,7 +97,9 @@ const ProjectsList = ({ onViewAll }: ProjectsListProps) => {
     return <Spinner className="size-4 text-ring" />;
   }
 
-  const [mostRecent, ...rest] = projects;
+  const [mostRecent, ...rest] = projects.sort(
+    (a, b) => b.updatedAt - a.updatedAt,
+  );
 
   return (
     <div className="flex flex-col  gap-4 ">
