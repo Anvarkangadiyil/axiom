@@ -8,6 +8,7 @@ import { Id } from "../../../../convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
 import { Allotment } from "allotment";
 import { FileExplorer } from "./file-explorer";
+import EditorView from "@/features/editor/components/editor-view";
 
 
 
@@ -86,7 +87,7 @@ const ProjectIdView = ({ projectId }: { projectId: Id<"projects"> }) => {
               <FileExplorer projectId={projectId}/>
             </Allotment.Pane>
             <Allotment.Pane>
-              <p>Editor View</p>
+              <EditorView projectId={projectId} />
             </Allotment.Pane>
 
           </Allotment>
