@@ -17,8 +17,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { useProject, useRenameProject } from "../hooks/use-projects";
 import { useState } from "react";
-import { Tooltip } from "@/components/ui/tooltip";
-import { TooltipContent, TooltipTrigger } from "@radix-ui/react-tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { CloudCheckIcon, LoaderIcon } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 

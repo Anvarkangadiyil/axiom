@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { Id } from "../../../../convex/_generated/dataModel";
 import TopNavigation from "./top-navigation";
 import { useEditor } from "../hooks/use-edior";
@@ -15,8 +15,16 @@ const EditorView = ({ projectId }: { projectId: Id<"projects"> }) => {
   const updateFile = useUpdateFile();
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const isActiveFileBinary =activeFile && activeFile.storageId;
+  const isActiveFileBinary = activeFile && activeFile.storageId;
   const isActiveFileText = activeFile && !isActiveFileBinary;
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [activeTabId]);
 
   return (
     <div className="flex flex-col h-full">
@@ -52,11 +60,7 @@ const EditorView = ({ projectId }: { projectId: Id<"projects"> }) => {
           />
         )}
 
-        {
-          isActiveFileBinary && (
-            <p>TODO: Implement</p>
-          )
-        }
+        {isActiveFileBinary && <p>TODO: Implement</p>}
       </div>
     </div>
   );

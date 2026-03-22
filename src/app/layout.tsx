@@ -5,8 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import Providers from "@/components/providers";
 
 import "./globals.css";
-import { dark } from "@clerk/themes";
-
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({
   variable: "--font-geist-sans",
@@ -33,9 +32,10 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head />
       <body className={`${inter.variable} ${plexMono.variable} antialiased`}>
-
-          <Providers>{children}</Providers>
-  
+        <Providers>
+          {children}
+          <Toaster />
+        </Providers>
       </body>
     </html>
   );

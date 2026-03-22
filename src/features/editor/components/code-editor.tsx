@@ -8,7 +8,9 @@ import { getLanguageExtension } from "../extensions/language-extension";
 import { minimap } from "../extensions/minimap";
 import { indentationMarkers } from "@replit/codemirror-indentation-markers";
 import { customSetup } from "../extensions/custom-setup";
-
+import { suggestion } from "../extensions/suggestion";
+import { quickEdit } from "../extensions/quick-edit";
+import { selectionTooltip } from "../extensions/selection-tooltip";
 
 interface Props {
   fileName: string;
@@ -16,7 +18,7 @@ interface Props {
   onChange: (value: string) => void;
 }
 
-const CodeEditor = ({ fileName, intialValue ="", onChange }: Props) => {
+const CodeEditor = ({ fileName, intialValue = "", onChange }: Props) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
 
@@ -35,6 +37,9 @@ const CodeEditor = ({ fileName, intialValue ="", onChange }: Props) => {
         customTheme,
         customSetup,
         languageExtension,
+        suggestion(fileName),
+        quickEdit(fileName),
+        selectionTooltip(),
         keymap.of([indentWithTab]),
         minimap(),
         indentationMarkers(),
@@ -46,12 +51,7 @@ const CodeEditor = ({ fileName, intialValue ="", onChange }: Props) => {
       ],
     });
     viewRef.current = view;
-
-    return () => {
-      view.destroy();
-      viewRef.current = null;
-    };
-  }, [languageExtension]);
+  }, []);
 
   return <div ref={editorRef} className="size-full pl-4 bg-background" />;
 };
