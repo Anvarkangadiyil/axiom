@@ -1,11 +1,9 @@
 import { z } from "zod";
-import ky from "ky";
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { firecrawl } from "@/lib/firecrawl";
 import { generateText, Output } from "ai";
-import { google } from "@ai-sdk/google";
-import { openrouter } from "@/lib/ai";
+import { groq } from "@ai-sdk/groq";
 
 const quickEditSchema = z.object({
   editedCode: z
@@ -102,7 +100,7 @@ export async function POST(req: Request) {
     // });
     
     const { output } = await generateText({
-      model: openrouter.chat("openrouter/auto"),
+      model: groq("openai/gpt-oss-20b"),
       output: Output.object({ schema: quickEditSchema }),
       prompt,
     });

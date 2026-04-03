@@ -5,6 +5,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 import Providers from "@/components/providers";
 
 import "./globals.css";
+import "allotment/dist/style.css";
+
 import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({

@@ -57,7 +57,7 @@ const ProjectView = () => {
               <img
                 src="/logo.svg"
                 alt="axiom"
-                className="size-8 md:size-[46px"
+                className="size-8 md:size-[46px}"
               />
               <h1
                 className={cn(
