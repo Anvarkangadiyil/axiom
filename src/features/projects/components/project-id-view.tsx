@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { Allotment } from "allotment";
 import { FileExplorer } from "./file-explorer";
 import EditorView from "@/features/editor/components/editor-view";
+import { PreviewView } from "./preview-view";
 
 
 
@@ -98,7 +99,7 @@ const ProjectIdView = ({ projectId }: { projectId: Id<"projects"> }) => {
             activeView === "preview" ? "visible" : "invisible",
           )}
         >
-          <div>Preview</div>
+          <PreviewView projectId={projectId}/>
         </div>
       </div>
     </div>

@@ -3,6 +3,12 @@ import { Id } from "../../../../convex/_generated/dataModel";
 import { api } from "../../../../convex/_generated/api";
 import { file } from "zod/v4";
 
+
+export const useFiles = (projectId: Id<"projects"> | null) => {
+  return useQuery(api.files.getFiles, projectId ? { projectId } : "skip");
+};
+
+
 export const useFile = (fileId: Id<"files"> | null) => {
   return useQuery(api.files.getFile, fileId ? { id: fileId } : "skip");
 };
