@@ -24,7 +24,7 @@ import {
   PromptInputTools,
   type PromptInputMessage,
 } from "@/components/ai-elements/prompt-input";
-import { DEFAULT_CONVERSATION_TITLE } from "../../../../convex/constants";
+import { DEFAULT_CONVERSATION_TITLE } from "../constants";
 import { Button } from "@/components/ui/button";
 import { CopyIcon, HistoryIcon, LoaderIcon, PlusIcon } from "lucide-react";
 import {
@@ -35,6 +35,7 @@ import {
 } from "../hooks/use-conversations";
 import { toast } from "sonner";
 import ky from "ky";
+import { PastConversationDialog } from "./past-conversation-dialog";
 
 interface ConversationSidebarProps {
   projectId: Id<"projects">;
@@ -44,6 +45,8 @@ const ConversationSidebar = ({ projectId }: ConversationSidebarProps) => {
   const [input, setInput] = React.useState<string>("");
   const [selectedConversationId, setSelectedConversationId] =
     React.useState<Id<"conversations"> | null>(null);
+
+  const[pastConversationOpen, setPastConversationOpen] = React.useState(false); 
 
   const createConversation = useCreateConversation();
   const conversations = useConversations(projectId);
@@ -78,7 +81,9 @@ const ConversationSidebar = ({ projectId }: ConversationSidebarProps) => {
   async function handleSubmit(message: PromptInputMessage) {
     // if processing no new message just stop function
     if (isProcessing && !message.text) {
+      handleCancel();
       setInput("");
+
       return;
     }
 
@@ -107,14 +112,37 @@ const ConversationSidebar = ({ projectId }: ConversationSidebarProps) => {
     setInput("");
   }
 
+
+  const handleCancel = async () => {
+    try {
+      await ky.post("/api/messages/cancel", {
+        json: {
+          projectId,
+        },
+      });
+    } catch (error) {
+      toast.error("Failed to cancel message");
+      console.error(error);
+    }
+  };
+
   return (
+    <>
+    <PastConversationDialog
+      projectId={projectId}
+      open={pastConversationOpen}
+      onOpenChange={setPastConversationOpen}
+      onSelect={setSelectedConversationId}
+    />
     <div className="flex flex-col h-full bg-sidebar">
       <div className="h-8.75 flex items-center justify-between border-b">
         <div className="text-sm truncate pl-3">
           {activeConversation?.title ?? DEFAULT_CONVERSATION_TITLE}
         </div>
         <div className="flex items-center px-1 gap-1">
-          <Button size="icon-sm" variant={"highlight"}>
+          <Button size="icon-sm" variant={"highlight"}
+          onClick={() => setPastConversationOpen(true)}
+          >
             <HistoryIcon className="size-4" />
           </Button>
           <Button
@@ -181,6 +209,7 @@ const ConversationSidebar = ({ projectId }: ConversationSidebarProps) => {
         </PromptInput>
       </div>
     </div>
+    </>
   );
 };
 

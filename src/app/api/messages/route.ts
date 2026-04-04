@@ -39,6 +39,49 @@ export async function POST(req: Request) {
 
   const projectId = conversation.projectId;
 
+  const processingMessages = await convex.query(
+    api.system.getProcessingMessages,
+    {
+      internalKey,
+      projectId: projectId as Id<"projects">,
+    },
+  );
+
+  if (processingMessages.length > 0) {
+    //Cancel all processing messagess
+    const processingMessages = await convex.query(
+      api.system.getProcessingMessages,
+      {
+        internalKey,
+        projectId: projectId as Id<"projects">,
+      },
+    );
+
+    if (processingMessages.length === 0) {
+      return new Response("No processing messages found", { status: 404 });
+    }
+
+    //Cancel all processing messagess
+    const cancelledIds = await Promise.all(
+      processingMessages.map(async (message) => {
+        await inngest.send({
+          name: "message/cancel",
+          data: {
+            messageId: message._id,
+            conversationId: message.conversationId,
+            projectId: message.projectId,
+          },
+        });
+
+        await convex.mutation(api.system.updateMessageStatus, {
+          internalKey,
+          messageId: message._id,
+          status: "cancelled",
+        });
+      }),
+    );
+  }
+
   //TODO:check got for processing messages
   await convex.mutation(api.system.createMessage, {
     internalKey,
@@ -62,6 +105,10 @@ export async function POST(req: Request) {
     name: "message/sent",
     data: {
       messageId: assistantMessageId,
+      conversationId: conversationId as Id<"conversations">,
+      projectId,
+      message,
+
     },
   });
 
