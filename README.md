@@ -1,36 +1,135 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Axiom
+
+> A browser-based, AI-powered cloud IDE. Write, run, and ship code from anywhere — no local setup required.
+
+![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=flat-square&logo=typescript)
+![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react)
+![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
+
+---
+
+## What is Axiom?
+
+Axiom is a full-featured cloud IDE that runs entirely in the browser. It pairs a powerful CodeMirror 6 editor with an in-browser Node.js runtime (via WebContainers), a real terminal, and deeply integrated AI — from inline suggestions to an autonomous coding agent — so you can go from idea to running code without touching your local machine.
+
+---
+
+## Features
+
+- **In-browser runtime** — Run Node.js projects directly in the browser using WebContainers, no backend sandbox needed
+- **CodeMirror 6 editor** — Syntax highlighting for JS/TS, HTML, CSS, Python, JSON, Markdown; minimap; indentation guides
+- **Integrated terminal** — Full xterm.js terminal with auto-fit
+- **Multi-model AI** — Swap between Groq (Llama), Google Gemini, and OpenRouter models on the fly
+- **AI agent** — Autonomous multi-step coding tasks powered by Inngest AgentKit
+- **Streaming responses** — Markdown, code blocks, math, and Mermaid diagrams rendered as they stream
+- **Web context** — Pull live web content into AI context via Firecrawl
+- **Resizable layout** — Flexible split-pane workspace
+- **Real-time backend** — Persistent workspace state with Convex
+- **Auth** — Clerk authentication with theme support
+- **Error monitoring** — Sentry on server, edge, and client
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 16, React 19 |
+| Language | TypeScript 5 |
+| Styling | Tailwind CSS v4 |
+| UI | Radix UI, shadcn/ui, Lucide React |
+| Editor | CodeMirror 6 |
+| Terminal | xterm.js |
+| Runtime | WebContainers API |
+| AI / LLM | Vercel AI SDK v6, Groq, Google Gemini, OpenRouter |
+| Agent | Inngest AgentKit |
+| Backend | Convex |
+| Auth | Clerk |
+| Web Scraping | Firecrawl |
+| Monitoring | Sentry |
+| State | Zustand |
+| Forms | React Hook Form + Zod |
+| Animations | Motion (Framer Motion v12) |
+
+---
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+
+- npm / yarn / pnpm / bun
+
+### Install
+
+```bash
+git clone https://github.com/Anvarkangadiyil/axiom.git
+cd axiom
+npm install
+```
+
+```
+
+### Run
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+> **Note:** WebContainers require `SharedArrayBuffer` support. The app must be served with these headers:
+> ```
+> Cross-Origin-Opener-Policy: same-origin
+> Cross-Origin-Embedder-Policy: require-corp
+> ```
+> These are already configured in `next.config.ts`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Build
 
-## Learn More
+```bash
+npm run build
+npm run start
+```
+---
 
-To learn more about Next.js, take a look at the following resources:
+## AI Models
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Purpose | Model |
+|---|---|
+| Code suggestions | `llama-3.1-8b-instant` via Groq |
+| Quick edit / inline | `openai/gpt-oss-20b` via OpenRouter |
+| Agent tasks | Configurable via settings |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Models can be switched at any time from the in-app settings panel.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deployment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Deploy to [Vercel](https://vercel.com) for the easiest setup. Make sure all environment variables are configured in your Vercel project settings.
+
+```bash
+vercel --prod
+```
+
+Convex, Clerk, and Inngest each require their own project setup — refer to their docs for deployment guides.
+
+---
+
+## Contributing
+
+Contributions are welcome! Feel free to open an issue or submit a pull request.
+
+1. Fork the repo
+2. Create a feature branch (`git checkout -b feat/my-feature`)
+3. Commit your changes (`git commit -m 'feat: add my feature'`)
+4. Push to the branch (`git push origin feat/my-feature`)
+5. Open a Pull Request
+
+---
+
+## License
+
+MIT © [Anvar Kangadiyil](https://github.com/Anvarkangadiyil)
