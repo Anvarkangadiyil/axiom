@@ -69,8 +69,6 @@ cd axiom
 npm install
 ```
 
-```
-
 ### Run
 
 ```bash
@@ -92,18 +90,6 @@ Open [http://localhost:3000](http://localhost:3000).
 npm run build
 npm run start
 ```
----
-
-## AI Models
-
-| Purpose | Model |
-|---|---|
-| Code suggestions | `llama-3.1-8b-instant` via Groq |
-| Quick edit / inline | `openai/gpt-oss-20b` via OpenRouter |
-| Agent tasks | Configurable via settings |
-
-Models can be switched at any time from the in-app settings panel.
-
 ---
 
 ## Deployment
