@@ -16,20 +16,37 @@ Axiom is a full-featured cloud IDE that runs entirely in the browser. It pairs a
 ---
 
 ## Features
-
-- **In-browser runtime** — Run Node.js projects directly in the browser using WebContainers, no backend sandbox needed
-- **CodeMirror 6 editor** — Syntax highlighting for JS/TS, HTML, CSS, Python, JSON, Markdown; minimap; indentation guides
-- **Integrated terminal** — Full xterm.js terminal with auto-fit
-- **Multi-model AI** — Swap between Groq (Llama), Google Gemini, and OpenRouter models on the fly
-- **AI agent** — Autonomous multi-step coding tasks powered by Inngest AgentKit
-- **Streaming responses** — Markdown, code blocks, math, and Mermaid diagrams rendered as they stream
-- **Web context** — Pull live web content into AI context via Firecrawl
-- **Resizable layout** — Flexible split-pane workspace
-- **Real-time backend** — Persistent workspace state with Convex
-- **Auth** — Clerk authentication with theme support
-- **Error monitoring** — Sentry on server, edge, and client
-
+ 
+### ✏️ Editor
+- **CodeMirror 6 editor** — Syntax highlighting for JS/TS, HTML, CSS, Python, JSON, and Markdown
+- **Minimap** — Bird's-eye view of your file via `@replit/codemirror-minimap`
+- **Indentation guides** — Visual indent markers for cleaner code navigation
+- **One Dark theme** — Easy on the eyes out of the box
+ 
+### 🤖 AI
+- **AI Suggestions** — Inline ghost-text completions as you type, powered by `llama-3.1-8b-instant` via Groq — similar to GitHub Copilot
+- **Quick Edit** — Select any block of code, type a prompt, and Axiom rewrites the selection in place — powered by `openai/gpt-oss-20b` via OpenRouter
+- **AI Agent** — Autonomous multi-step coding tasks powered by Inngest AgentKit; the agent can read, write, and run code to complete complex goals
+- **Streaming responses** — Markdown, code blocks, math equations, and Mermaid diagrams rendered as they stream in real time
+- **Web context** — Pull live web content into AI context via Firecrawl for research-grounded code generation
+ 
+### 💻 Runtime & Terminal
+- **In-browser Node.js runtime** — Run full Node.js projects directly in the browser using WebContainers, no backend sandbox needed
+- **Integrated terminal** — Full xterm.js terminal with auto-fit; run scripts, install packages, and see output live
+ 
+### 🗂️ Workspace
+- **Resizable split-pane layout** — Flexible editor/terminal/panel layout powered by allotment and react-resizable-panels
+- **Node graph views** — Visualize project structure and relationships with React Flow
+- **Real-time backend** — Persistent workspace state synced with Convex
+- **Token usage tracking** — Monitor AI token consumption with tokenlens
+ 
+### 🔐 Auth & Infrastructure
+- **Authentication** — Clerk-powered sign-in with theme support
+- **Error monitoring** — Sentry instrumented on server, edge, and client
+- **Background jobs** — Inngest for reliable async and scheduled tasks
+ 
 ---
+]
 
 ## Tech Stack
 
