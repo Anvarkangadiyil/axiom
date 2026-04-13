@@ -59,15 +59,13 @@ Axiom is a full-featured cloud IDE that runs entirely in the browser. It pairs a
 | Editor | CodeMirror 6 |
 | Terminal | xterm.js |
 | Runtime | WebContainers API |
-| AI / LLM | Vercel AI SDK v6, Groq, Google Gemini, OpenRouter |
+| AI / LLM | Vercel AI SDK v6,Google Gemini, OpenRouter, Claude |
 | Agent | Inngest AgentKit |
 | Backend | Convex |
 | Auth | Clerk |
 | Web Scraping | Firecrawl |
 | Monitoring | Sentry |
 | State | Zustand |
-| Forms | React Hook Form + Zod |
-| Animations | Motion (Framer Motion v12) |
 
 ---
 
