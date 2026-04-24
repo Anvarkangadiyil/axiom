@@ -31,7 +31,7 @@ const ProjectView = () => {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey) {
-        if (event.key === "k") {
+        if (event.key === "q") {
           setCommandDialogOpen(true);
         }
       }
