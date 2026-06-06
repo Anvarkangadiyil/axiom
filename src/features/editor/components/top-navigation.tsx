@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { Spinner } from "@/components/ui/spinner";
 import { FileIcon } from "@react-symbols/icons/utils";
 import { XIcon } from "lucide-react";
+import DiffChangesetIndicator from "./diff-changeset-indicator";
 
 const Tab = ({
   fileId,
@@ -31,7 +32,7 @@ const Tab = ({
       className={cn(
         "flex items-center gap-2 h-8.75 pl-2 pr-1.5 text-muted-foreground group border-y border-x border-transparent hover:bg-accent/30 bg-background",
         isActive &&
-          "bg-background text-foreground border-x-border border-b-background -mb-px drop-show",
+        "bg-background text-foreground border-x-border border-b-background -mb-px drop-show",
         isFirst && "border-l-transparent!",
       )}
     >
@@ -71,19 +72,26 @@ const TopNavigation = ({ projectId }: { projectId: Id<"projects"> }) => {
   const { openTabs } = useEditor(projectId);
 
   return (
-    <ScrollArea>
-      <nav className="bg-sidebar flex items-center h-8.75 border-b border-b-border">
-        {openTabs.map((fileId, index) => (
-          <Tab
-            key={fileId}
-            fileId={fileId}
-            isFirst={index === 0}
-            projectId={projectId}
-          />
-        ))}
-      </nav>
-      <ScrollBar orientation="horizontal" />
-    </ScrollArea>
+    <div className="flex items-center w-full">
+      <ScrollArea className="flex-1">
+        <nav className="bg-sidebar flex items-center h-8.75 border-b border-b-border">
+          {openTabs.map((fileId, index) => (
+            <Tab
+              key={fileId}
+              fileId={fileId}
+              isFirst={index === 0}
+              projectId={projectId}
+            />
+          ))}
+        </nav>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
+
+      {/* Diff changeset indicator */}
+      <div className="flex items-center border-b border-b-border h-8.75 shrink-0">
+        <DiffChangesetIndicator projectId={projectId} />
+      </div>
+    </div>
   );
 };
 

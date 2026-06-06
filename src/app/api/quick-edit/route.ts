@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { firecrawl } from "@/lib/firecrawl";
 import { generateText, Output } from "ai";
 import { groq } from "@ai-sdk/groq";
+import { google } from "@ai-sdk/google";
 
 const quickEditSchema = z.object({
   editedCode: z
@@ -90,17 +91,8 @@ export async function POST(req: Request) {
       .replace("{instruction}", instruction)
       .replace("{documentation}", documentContext);
 
-    // //TODO: CHANGE MODEL
-    // const { output } = await generateText({
-    //   model: google("gemini-2.5-flash"),
-    //   output: Output.object({
-    //     schema: quickEditSchema,
-    //   }),
-    //   prompt,
-    // });
-    
     const { output } = await generateText({
-      model: groq("openai/gpt-oss-20b"),
+      model: google("gemini-2.5-flash"),
       output: Output.object({ schema: quickEditSchema }),
       prompt,
     });

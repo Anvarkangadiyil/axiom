@@ -1,4 +1,5 @@
 import { Id } from "../../../../convex/_generated/dataModel";
+import { nanoid } from "nanoid";
 import { convex } from "@/lib/convex-client";
 import { api } from "../../../../convex/_generated/api";
 
@@ -138,9 +139,9 @@ export const processMessage = inngest.createFunction(
           typeof textMessage.content === "string"
             ? textMessage.content.trim()
             : textMessage.content
-                .map((c) => c.text)
-                .join("")
-                .trim();
+              .map((c) => c.text)
+              .join("")
+              .trim();
 
         if (title) {
           await step.run("update-conversation-title", async () => {
@@ -154,13 +155,16 @@ export const processMessage = inngest.createFunction(
       }
     }
 
+    // Generate a unique changesetId for this agent run
+    const changesetId = nanoid();
+
     //Create coding agent with file tool
     const codingAgent = createAgent({
       name: "axiom",
       description: "An expert AI codign Agent",
       system: systemPrompt,
       model: openai({
-        model: "meta-llama/llama-4-scout-17b-16e-instruct",
+        model: "openai/gpt-oss-120b",
         apiKey: process.env.GROQ_API_KEY,
         baseUrl: "https://api.groq.com/openai/v1",
         defaultParameters: {
@@ -170,11 +174,11 @@ export const processMessage = inngest.createFunction(
       tools: [
         createListFilesTool({ internalKey, projectId }),
         createReadFilesTool({ internalKey }),
-        createUpdateFileTool({ internalKey }),
-        createCreateFilesTool({ projectId, internalKey }),
+        createUpdateFileTool({ internalKey, changesetId }),
+        createCreateFilesTool({ projectId, internalKey, changesetId }),
         createCreateFolderTool({ projectId, internalKey }),
-        createRenameFileTool({ internalKey }),
-        createDeleteFilesTool({ internalKey }),
+        createRenameFileTool({ internalKey, changesetId }),
+        createDeleteFilesTool({ internalKey, changesetId }),
         createScrapeUrlsTool(),
       ],
     });

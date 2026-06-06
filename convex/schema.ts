@@ -64,4 +64,30 @@ export default defineSchema({
   })
     .index("by_conversation", ["conversationId"])
     .index("by_project_status", ["projectId", "status"]),
+
+  fileChanges: defineTable({
+    projectId: v.id("projects"),
+    fileId: v.optional(v.id("files")),
+    changesetId: v.string(),
+    operation: v.union(
+      v.literal("update"),
+      v.literal("create"),
+      v.literal("delete"),
+      v.literal("rename"),
+    ),
+    fileName: v.string(),
+    parentId: v.optional(v.id("files")),
+    oldContent: v.optional(v.string()),
+    newContent: v.optional(v.string()),
+    newName: v.optional(v.string()),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("accepted"),
+      v.literal("rejected"),
+    ),
+    createdAt: v.number(),
+  })
+    .index("by_project", ["projectId"])
+    .index("by_changeset", ["changesetId"])
+    .index("by_project_status", ["projectId", "status"]),
 });

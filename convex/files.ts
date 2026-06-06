@@ -420,3 +420,212 @@ export const updateFile = mutation({
     });
   },
 });
+
+// ── Diff Review: Accept/Reject mutations ──
+
+export const getPendingChanges = query({
+  args: {
+    projectId: v.id("projects"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await verifyAuth(ctx);
+
+    const project = await ctx.db.get("projects", args.projectId);
+    if (!project) throw new Error("Project not found");
+    if (project.ownerId !== identity?.subject) throw new Error("Unauthorized");
+
+    return await ctx.db
+      .query("fileChanges")
+      .withIndex("by_project_status", (q) =>
+        q.eq("projectId", args.projectId).eq("status", "pending")
+      )
+      .collect();
+  },
+});
+
+export const acceptChange = mutation({
+  args: {
+    changeId: v.id("fileChanges"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await verifyAuth(ctx);
+
+    const change = await ctx.db.get(args.changeId);
+    if (!change) throw new Error("Change not found");
+
+    const project = await ctx.db.get("projects", change.projectId);
+    if (!project) throw new Error("Project not found");
+    if (project.ownerId !== identity?.subject) throw new Error("Unauthorized");
+
+    const now = Date.now();
+
+    if (change.operation === "update" && change.fileId) {
+      await ctx.db.patch(change.fileId, {
+        content: change.newContent ?? "",
+        updatedAt: now,
+      });
+    } else if (change.operation === "create") {
+      await ctx.db.insert("files", {
+        projectId: change.projectId,
+        parentId: change.parentId,
+        name: change.fileName,
+        type: "file",
+        content: change.newContent ?? "",
+        updatedAt: now,
+      });
+    } else if (change.operation === "delete" && change.fileId) {
+      // Recursively delete file/folder
+      const deleteRecursive = async (fileId: typeof change.fileId) => {
+        if (!fileId) return;
+        const item = await ctx.db.get(fileId);
+        if (!item) return;
+
+        if (item.type === "folder") {
+          const children = await ctx.db
+            .query("files")
+            .withIndex("by_project_parent", (q) =>
+              q.eq("projectId", item.projectId).eq("parentId", fileId)
+            )
+            .collect();
+          for (const child of children) {
+            await deleteRecursive(child._id);
+          }
+        }
+
+        if (item.storageId) {
+          await ctx.storage.delete(item.storageId);
+        }
+        await ctx.db.delete(fileId);
+      };
+
+      await deleteRecursive(change.fileId);
+    } else if (change.operation === "rename" && change.fileId && change.newName) {
+      await ctx.db.patch(change.fileId, {
+        name: change.newName,
+        updatedAt: now,
+      });
+    }
+
+    // Mark change as accepted
+    await ctx.db.patch(args.changeId, { status: "accepted" as const });
+
+    // Update project timestamp
+    await ctx.db.patch(change.projectId, { updatedAt: now });
+  },
+});
+
+export const rejectChange = mutation({
+  args: {
+    changeId: v.id("fileChanges"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await verifyAuth(ctx);
+
+    const change = await ctx.db.get(args.changeId);
+    if (!change) throw new Error("Change not found");
+
+    const project = await ctx.db.get("projects", change.projectId);
+    if (!project) throw new Error("Project not found");
+    if (project.ownerId !== identity?.subject) throw new Error("Unauthorized");
+
+    await ctx.db.patch(args.changeId, { status: "rejected" as const });
+  },
+});
+
+export const acceptAllChanges = mutation({
+  args: {
+    changesetId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await verifyAuth(ctx);
+
+    const changes = await ctx.db
+      .query("fileChanges")
+      .withIndex("by_changeset", (q) => q.eq("changesetId", args.changesetId))
+      .collect();
+
+    if (changes.length === 0) throw new Error("No changes found");
+
+    const project = await ctx.db.get("projects", changes[0].projectId);
+    if (!project) throw new Error("Project not found");
+    if (project.ownerId !== identity?.subject) throw new Error("Unauthorized");
+
+    const now = Date.now();
+
+    for (const change of changes) {
+      if (change.status !== "pending") continue;
+
+      if (change.operation === "update" && change.fileId) {
+        await ctx.db.patch(change.fileId, {
+          content: change.newContent ?? "",
+          updatedAt: now,
+        });
+      } else if (change.operation === "create") {
+        await ctx.db.insert("files", {
+          projectId: change.projectId,
+          parentId: change.parentId,
+          name: change.fileName,
+          type: "file",
+          content: change.newContent ?? "",
+          updatedAt: now,
+        });
+      } else if (change.operation === "delete" && change.fileId) {
+        const deleteRecursive = async (fileId: typeof change.fileId) => {
+          if (!fileId) return;
+          const item = await ctx.db.get(fileId);
+          if (!item) return;
+          if (item.type === "folder") {
+            const children = await ctx.db
+              .query("files")
+              .withIndex("by_project_parent", (q) =>
+                q.eq("projectId", item.projectId).eq("parentId", fileId)
+              )
+              .collect();
+            for (const child of children) {
+              await deleteRecursive(child._id);
+            }
+          }
+          if (item.storageId) {
+            await ctx.storage.delete(item.storageId);
+          }
+          await ctx.db.delete(fileId);
+        };
+        await deleteRecursive(change.fileId);
+      } else if (change.operation === "rename" && change.fileId && change.newName) {
+        await ctx.db.patch(change.fileId, {
+          name: change.newName,
+          updatedAt: now,
+        });
+      }
+
+      await ctx.db.patch(change._id, { status: "accepted" as const });
+    }
+
+    await ctx.db.patch(changes[0].projectId, { updatedAt: now });
+  },
+});
+
+export const rejectAllChanges = mutation({
+  args: {
+    changesetId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await verifyAuth(ctx);
+
+    const changes = await ctx.db
+      .query("fileChanges")
+      .withIndex("by_changeset", (q) => q.eq("changesetId", args.changesetId))
+      .collect();
+
+    if (changes.length === 0) throw new Error("No changes found");
+
+    const project = await ctx.db.get("projects", changes[0].projectId);
+    if (!project) throw new Error("Project not found");
+    if (project.ownerId !== identity?.subject) throw new Error("Unauthorized");
+
+    for (const change of changes) {
+      if (change.status !== "pending") continue;
+      await ctx.db.patch(change._id, { status: "rejected" as const });
+    }
+  },
+});

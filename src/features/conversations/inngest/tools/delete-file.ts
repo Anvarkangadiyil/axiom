@@ -8,6 +8,7 @@ import { Id } from "../../../../../convex/_generated/dataModel";
 
 interface DeleteFilesToolOptions {
   internalKey: string;
+  changesetId: string;
 }
 
 const paramsSchema = z.object({
@@ -18,6 +19,7 @@ const paramsSchema = z.object({
 
 export const createDeleteFilesTool = ({
   internalKey,
+  changesetId,
 }: DeleteFilesToolOptions) => {
   return createTool({
     name: "deleteFiles",
@@ -61,22 +63,23 @@ export const createDeleteFilesTool = ({
       }
 
       try {
-        return await toolStep?.run("delete-files", async () => {
+        return await toolStep?.run("stage-delete-files", async () => {
           const results: string[] = [];
 
           for (const file of filesToDelete) {
-            await convex.mutation(api.system.deleteFile, {
+            await convex.mutation(api.system.stageFileDelete, {
               internalKey,
+              changesetId,
               fileId: file.id as Id<"files">,
             });
 
-            results.push(`Deleted ${file.type} "${file.name}" successfully`);
+            results.push(`Staged deletion of ${file.type} "${file.name}" for review`);
           }
 
           return results.join("\n");
         });
       } catch (error) {
-        return `Error deleting files: ${error instanceof Error ? error.message : "Unknown error"}`;
+        return `Error staging file deletions: ${error instanceof Error ? error.message : "Unknown error"}`;
       }
     }
   });

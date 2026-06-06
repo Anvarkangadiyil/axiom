@@ -8,6 +8,7 @@ import { Id } from "../../../../../convex/_generated/dataModel";
 
 interface RenameFileToolOptions {
   internalKey: string;
+  changesetId: string;
 }
 
 const paramsSchema = z.object({
@@ -17,6 +18,7 @@ const paramsSchema = z.object({
 
 export const createRenameFileTool = ({
   internalKey,
+  changesetId,
 }: RenameFileToolOptions) => {
   return createTool({
     name: "renameFile",
@@ -44,17 +46,18 @@ export const createRenameFileTool = ({
       }
 
       try {
-        return await toolStep?.run("rename-file", async () => {
-          await convex.mutation(api.system.renameFile, {
+        return await toolStep?.run("stage-rename-file", async () => {
+          await convex.mutation(api.system.stageFileRename, {
             internalKey,
+            changesetId,
             fileId: fileId as Id<"files">,
             newName,
           });
 
-          return `Renamed "${file.name}" to "${newName}" successfully`;        
+          return `Rename of "${file.name}" to "${newName}" staged for review`;        
         })
       } catch (error) {
-        return `Error renaming file: ${error instanceof Error ? error.message : "Unknown error"}`;
+        return `Error staging file rename: ${error instanceof Error ? error.message : "Unknown error"}`;
       }
     }
   });

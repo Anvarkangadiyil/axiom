@@ -8,6 +8,7 @@ import { Id } from "../../../../../convex/_generated/dataModel";
 
 interface UpdateFileToolOptions {
   internalKey: string;
+  changesetId: string;
 }
 
 const paramsSchema = z.object({
@@ -17,13 +18,14 @@ const paramsSchema = z.object({
 
 export const createUpdateFileTool = ({
   internalKey,
+  changesetId,
 }: UpdateFileToolOptions) => {
   return createTool({
     name: "updateFile",
-    description: "Update the content of an existing file",
+    description: "Update the content of an existing file. Use listFiles first to get the fileId, then readFiles to see current content before making changes. Provide the complete new file content (not a diff or partial update).",
     parameters: z.object({
-      fileId: z.string().describe("The ID of the file to update"),
-      content: z.string().describe("The new content for the file"),
+      fileId: z.string().describe("The ID of the file to update (get this from listFiles)"),
+      content: z.string().describe("The complete new content for the file (replaces the entire file)"),
     }),
     handler: async (params, { step: toolStep }) => {
       const parsed = paramsSchema.safeParse(params);
@@ -49,17 +51,18 @@ export const createUpdateFileTool = ({
       }
 
       try {
-        return await toolStep?.run("update-file", async () => {
-          await convex.mutation(api.system.updateFile, {
+        return await toolStep?.run("stage-update-file", async () => {
+          await convex.mutation(api.system.stageFileUpdate, {
             internalKey,
+            changesetId,
             fileId: fileId as Id<"files">,
-            content,
+            newContent: content,
           });
 
-          return `File "${file.name}" updated successfully`;
+          return `File "${file.name}" update staged for review`;
         })
       } catch (error) {
-        return `Error update file: ${error instanceof Error ? error.message : "Unknown error"}`;
+        return `Error staging file update: ${error instanceof Error ? error.message : "Unknown error"}`;
       }
     }
   });

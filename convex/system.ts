@@ -601,3 +601,179 @@ export const createProject = mutation({
   },
 });
 
+// ── Staging mutations for agent diff review ──
+
+// Stage a file update (snapshot old + new content)
+export const stageFileUpdate = mutation({
+  args: {
+    internalKey: v.string(),
+    changesetId: v.string(),
+    fileId: v.id("files"),
+    newContent: v.string(),
+  },
+  handler: async (ctx, args) => {
+    validateInternalKey(args.internalKey);
+
+    const file = await ctx.db.get(args.fileId);
+    if (!file) {
+      throw new Error("File not found");
+    }
+
+    await ctx.db.insert("fileChanges", {
+      projectId: file.projectId,
+      fileId: args.fileId,
+      changesetId: args.changesetId,
+      operation: "update",
+      fileName: file.name,
+      oldContent: file.content ?? "",
+      newContent: args.newContent,
+      status: "pending",
+      createdAt: Date.now(),
+    });
+
+    return args.fileId;
+  },
+});
+
+// Stage a new file creation
+export const stageFileCreate = mutation({
+  args: {
+    internalKey: v.string(),
+    changesetId: v.string(),
+    projectId: v.id("projects"),
+    parentId: v.optional(v.id("files")),
+    fileName: v.string(),
+    content: v.string(),
+  },
+  handler: async (ctx, args) => {
+    validateInternalKey(args.internalKey);
+
+    await ctx.db.insert("fileChanges", {
+      projectId: args.projectId,
+      changesetId: args.changesetId,
+      operation: "create",
+      fileName: args.fileName,
+      parentId: args.parentId,
+      newContent: args.content,
+      status: "pending",
+      createdAt: Date.now(),
+    });
+  },
+});
+
+// Stage bulk file creation
+export const stageFileCreateBulk = mutation({
+  args: {
+    internalKey: v.string(),
+    changesetId: v.string(),
+    projectId: v.id("projects"),
+    parentId: v.optional(v.id("files")),
+    files: v.array(
+      v.object({
+        name: v.string(),
+        content: v.string(),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    validateInternalKey(args.internalKey);
+
+    const results: { name: string; staged: boolean }[] = [];
+
+    for (const file of args.files) {
+      await ctx.db.insert("fileChanges", {
+        projectId: args.projectId,
+        changesetId: args.changesetId,
+        operation: "create",
+        fileName: file.name,
+        parentId: args.parentId,
+        newContent: file.content,
+        status: "pending",
+        createdAt: Date.now(),
+      });
+      results.push({ name: file.name, staged: true });
+    }
+
+    return results;
+  },
+});
+
+// Stage a file deletion
+export const stageFileDelete = mutation({
+  args: {
+    internalKey: v.string(),
+    changesetId: v.string(),
+    fileId: v.id("files"),
+  },
+  handler: async (ctx, args) => {
+    validateInternalKey(args.internalKey);
+
+    const file = await ctx.db.get(args.fileId);
+    if (!file) {
+      throw new Error("File not found");
+    }
+
+    await ctx.db.insert("fileChanges", {
+      projectId: file.projectId,
+      fileId: args.fileId,
+      changesetId: args.changesetId,
+      operation: "delete",
+      fileName: file.name,
+      oldContent: file.content ?? "",
+      status: "pending",
+      createdAt: Date.now(),
+    });
+
+    return args.fileId;
+  },
+});
+
+// Stage a file rename
+export const stageFileRename = mutation({
+  args: {
+    internalKey: v.string(),
+    changesetId: v.string(),
+    fileId: v.id("files"),
+    newName: v.string(),
+  },
+  handler: async (ctx, args) => {
+    validateInternalKey(args.internalKey);
+
+    const file = await ctx.db.get(args.fileId);
+    if (!file) {
+      throw new Error("File not found");
+    }
+
+    await ctx.db.insert("fileChanges", {
+      projectId: file.projectId,
+      fileId: args.fileId,
+      changesetId: args.changesetId,
+      operation: "rename",
+      fileName: file.name,
+      newName: args.newName,
+      oldContent: file.content ?? "",
+      status: "pending",
+      createdAt: Date.now(),
+    });
+
+    return args.fileId;
+  },
+});
+
+// Query pending changeset for a project
+export const getPendingChangeset = query({
+  args: {
+    internalKey: v.string(),
+    projectId: v.id("projects"),
+  },
+  handler: async (ctx, args) => {
+    validateInternalKey(args.internalKey);
+
+    return await ctx.db
+      .query("fileChanges")
+      .withIndex("by_project_status", (q) =>
+        q.eq("projectId", args.projectId).eq("status", "pending")
+      )
+      .collect();
+  },
+});

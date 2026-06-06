@@ -13,10 +13,24 @@ const defaultTabState: TabState = {
   previewTabId: null,
 };
 
+interface DiffReviewState {
+  isOpen: boolean;
+  currentChangeIndex: number;
+  totalChanges: number;
+}
+
+const defaultDiffReviewState: DiffReviewState = {
+  isOpen: false,
+  currentChangeIndex: 0,
+  totalChanges: 0,
+};
+
 interface EditorStore {
   tabs: Map<Id<"projects">, TabState>;
+  diffReview: Map<Id<"projects">, DiffReviewState>;
 
   getTabState: (id: Id<"projects">) => TabState;
+  getDiffReviewState: (id: Id<"projects">) => DiffReviewState;
 
   openFile: (
     projectId: Id<"projects">,
@@ -28,12 +42,21 @@ interface EditorStore {
   closeAllTabs: (projectId: Id<"projects">) => void;
 
   setActiveTab: (projectId: Id<"projects">, fileId: Id<"files">) => void;
+
+  // Diff review actions
+  openDiffReview: (projectId: Id<"projects">, totalChanges: number) => void;
+  closeDiffReview: (projectId: Id<"projects">) => void;
+  navigateChange: (projectId: Id<"projects">, direction: "next" | "prev") => void;
+  setCurrentChangeIndex: (projectId: Id<"projects">, index: number) => void;
+  updateTotalChanges: (projectId: Id<"projects">, total: number) => void;
 }
 
 export const useEditorStore = create<EditorStore>()((set, get) => ({
   tabs: new Map(),
+  diffReview: new Map(),
 
   getTabState: (id: Id<"projects">) => get().tabs.get(id) ?? defaultTabState,
+  getDiffReviewState: (id: Id<"projects">) => get().diffReview.get(id) ?? defaultDiffReviewState,
 
   openFile: (projectId, fileId, { pinned }) => {
     const tabs = new Map(get().tabs);
@@ -121,5 +144,58 @@ export const useEditorStore = create<EditorStore>()((set, get) => ({
       activeTabId: fileId,
     });
     set({ tabs });
+  },
+
+  // ── Diff review actions ──
+
+  openDiffReview: (projectId, totalChanges) => {
+    const diffReview = new Map(get().diffReview);
+    diffReview.set(projectId, {
+      isOpen: true,
+      currentChangeIndex: 0,
+      totalChanges,
+    });
+    set({ diffReview });
+  },
+
+  closeDiffReview: (projectId) => {
+    const diffReview = new Map(get().diffReview);
+    diffReview.set(projectId, defaultDiffReviewState);
+    set({ diffReview });
+  },
+
+  navigateChange: (projectId, direction) => {
+    const diffReview = new Map(get().diffReview);
+    const state = diffReview.get(projectId) ?? defaultDiffReviewState;
+    const newIndex =
+      direction === "next"
+        ? Math.min(state.currentChangeIndex + 1, state.totalChanges - 1)
+        : Math.max(state.currentChangeIndex - 1, 0);
+    diffReview.set(projectId, {
+      ...state,
+      currentChangeIndex: newIndex,
+    });
+    set({ diffReview });
+  },
+
+  setCurrentChangeIndex: (projectId, index) => {
+    const diffReview = new Map(get().diffReview);
+    const state = diffReview.get(projectId) ?? defaultDiffReviewState;
+    diffReview.set(projectId, {
+      ...state,
+      currentChangeIndex: Math.max(0, Math.min(index, state.totalChanges - 1)),
+    });
+    set({ diffReview });
+  },
+
+  updateTotalChanges: (projectId, total) => {
+    const diffReview = new Map(get().diffReview);
+    const state = diffReview.get(projectId) ?? defaultDiffReviewState;
+    diffReview.set(projectId, {
+      ...state,
+      totalChanges: total,
+      currentChangeIndex: Math.min(state.currentChangeIndex, Math.max(0, total - 1)),
+    });
+    set({ diffReview });
   },
 }));

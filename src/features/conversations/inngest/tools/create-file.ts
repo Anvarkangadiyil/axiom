@@ -9,6 +9,7 @@ import { Id } from "../../../../../convex/_generated/dataModel";
 interface CreateFilesToolOptions {
   projectId: Id<"projects">;
   internalKey: string;
+  changesetId: string;
 }
 
 const paramsSchema = z.object({
@@ -26,6 +27,7 @@ const paramsSchema = z.object({
 export const createCreateFilesTool = ({
   projectId,
   internalKey,
+  changesetId,
 }: CreateFilesToolOptions) => {
   return createTool({
     name: "createFiles",
@@ -55,7 +57,7 @@ export const createCreateFilesTool = ({
       const { parentId, files } = parsed.data;
 
       try {
-        return await toolStep?.run("create-files", async () => {
+        return await toolStep?.run("stage-create-files", async () => {
           let resolvedParentId: Id<"files"> | undefined;
 
           if (parentId && parentId !== "") {
@@ -76,28 +78,25 @@ export const createCreateFilesTool = ({
             }
           }
 
-          const results = await convex.mutation(api.system.createFiles, {
+          const results = await convex.mutation(api.system.stageFileCreateBulk, {
             internalKey,
+            changesetId,
             projectId,
             parentId: resolvedParentId,
             files,
           });
 
-          const created = results.filter((r) => !r.error);
-          const failed = results.filter((r) => r.error);
+          const staged = results.filter((r) => r.staged);
 
-          let response = `Created ${created.length} file(s)`;
-          if (created.length > 0) {
-            response += `: ${created.map((r) => r.name).join(", ")}`;
-          }
-          if (failed.length > 0) {
-            response += `. Failed: ${failed.map((r) => `${r.name} (${r.error})`).join(", ")}`;
+          let response = `Staged ${staged.length} file(s) for review`;
+          if (staged.length > 0) {
+            response += `: ${staged.map((r) => r.name).join(", ")}`;
           }
 
           return response;
         });
       } catch (error) {
-        return `Error creating files: ${error instanceof Error ? error.message : "Unknown error"}`;
+        return `Error staging files: ${error instanceof Error ? error.message : "Unknown error"}`;
       }
     }
   });

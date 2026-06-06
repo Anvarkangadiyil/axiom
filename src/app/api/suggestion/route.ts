@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@clerk/nextjs/server";
 import { groq } from "@ai-sdk/groq";
+import { google } from "@ai-sdk/google";
 
 /**
  * Zod Schema
@@ -160,7 +161,7 @@ export async function POST(req: Request) {
     try {
 
       const result = await generateText({
-        model: groq("qwen/qwen3-32b"),
+        model: groq("qwen-2.5-coder-32b"),
 
         prompt,
 
@@ -201,7 +202,24 @@ export async function POST(req: Request) {
         qwenError
       );
 
-    
+      try {
+        const fallbackResult = await generateText({
+          model: google("gemini-2.5-flash"),
+          prompt,
+          temperature: 0.1,
+        });
+
+        const parsed = extractJSON(fallbackResult.text);
+
+        if (parsed) {
+          const validated = suggestionSchema.parse(parsed);
+          suggestion = validated.suggestion ?? "";
+        } else {
+          console.warn("No JSON detected from Gemini");
+        }
+      } catch (geminiError) {
+        console.error("Gemini fallback generation failed:", geminiError);
+      }
     }
 
     /**

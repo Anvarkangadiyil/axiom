@@ -1,34 +1,69 @@
 import { useCallback } from "react";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useEditorStore } from "../store/use-editor-store";
+
 export const useEditor = (projectId: Id<"projects">) => {
-  const store = useEditorStore();
-
+  // Use selectors for reactive state (these only re-render when their specific value changes)
   const tabsState = useEditorStore((state) => state.getTabState(projectId));
+  const diffReviewState = useEditorStore((state) => state.getDiffReviewState(projectId));
 
+  // Use getState() for actions to avoid subscribing to the whole store
   const openFile = useCallback(
     (fileId: Id<"files">, options: { pinned: boolean }) => {
-      store.openFile(projectId, fileId, options);
+      useEditorStore.getState().openFile(projectId, fileId, options);
     },
-    [store, projectId],
+    [projectId],
   );
 
   const closeTab = useCallback(
     (fileId: Id<"files">) => {
-      store.closeTab(projectId, fileId);
+      useEditorStore.getState().closeTab(projectId, fileId);
     },
-    [store, projectId],
+    [projectId],
   );
 
   const closeAllTabs = useCallback(() => {
-    store.closeAllTabs(projectId);
-  }, [store, projectId]);
+    useEditorStore.getState().closeAllTabs(projectId);
+  }, [projectId]);
 
   const setActiveTab = useCallback(
     (fileId: Id<"files">) => {
-      store.setActiveTab(projectId, fileId);
+      useEditorStore.getState().setActiveTab(projectId, fileId);
     },
-    [store, projectId],
+    [projectId],
+  );
+
+  // Diff review actions
+  const openDiffReview = useCallback(
+    (totalChanges: number) => {
+      useEditorStore.getState().openDiffReview(projectId, totalChanges);
+    },
+    [projectId],
+  );
+
+  const closeDiffReview = useCallback(() => {
+    useEditorStore.getState().closeDiffReview(projectId);
+  }, [projectId]);
+
+  const navigateChange = useCallback(
+    (direction: "next" | "prev") => {
+      useEditorStore.getState().navigateChange(projectId, direction);
+    },
+    [projectId],
+  );
+
+  const setCurrentChangeIndex = useCallback(
+    (index: number) => {
+      useEditorStore.getState().setCurrentChangeIndex(projectId, index);
+    },
+    [projectId],
+  );
+
+  const updateTotalChanges = useCallback(
+    (total: number) => {
+      useEditorStore.getState().updateTotalChanges(projectId, total);
+    },
+    [projectId],
   );
 
   return {
@@ -39,5 +74,12 @@ export const useEditor = (projectId: Id<"projects">) => {
     closeTab,
     closeAllTabs,
     setActiveTab,
+    // Diff review
+    diffReview: diffReviewState,
+    openDiffReview,
+    closeDiffReview,
+    navigateChange,
+    setCurrentChangeIndex,
+    updateTotalChanges,
   };
 };
