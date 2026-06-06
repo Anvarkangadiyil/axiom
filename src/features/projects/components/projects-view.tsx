@@ -18,6 +18,7 @@ import { Kbd } from "@/components/ui/kbd";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import ProjectsCommandDialog from "./projects-command-dialog";
+import { ImportGithubDialog } from "./import-github-dialog";
 
 const font = Poppins({
   subsets: ["latin"],
@@ -26,21 +27,28 @@ const font = Poppins({
 
 const ProjectView = () => {
   const createProject = useCreateProject();
+
   const [commandDialogOpen, setCommandDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey) {
         if (event.key === "q") {
+          event.preventDefault();
           setCommandDialogOpen(true);
+        }
+        if (event.key === "i") {
+          event.preventDefault();
+          setImportDialogOpen(true);
         }
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
 
@@ -49,6 +57,10 @@ const ProjectView = () => {
       <ProjectsCommandDialog
         open={commandDialogOpen}
         onOpenChange={setCommandDialogOpen}
+      />
+      <ImportGithubDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
       />
       <div className="min-h-screen bg-sidebar flex flex-col items-center justify-center p-6 md:p-6">
         <div className="w-full max-w-sm mx-auto flex-col gap-4 items-center">
@@ -98,7 +110,7 @@ const ProjectView = () => {
               </Button>
               <Button
                 variant={"outline"}
-                onClick={() => {}}
+                onClick={() => setImportDialogOpen(true)}
                 className="h-full  items-start justify-start p-4 bg-background border flex flex-col rounded-none"
               >
                 <div className="flex items-center justify-between w-full">

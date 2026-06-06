@@ -1,6 +1,6 @@
 "use client";
 
-import  { useState } from "react";
+import { useState } from "react";
 import { FaGithub } from "react-icons/fa";
 
 import { Id } from "../../../../convex/_generated/dataModel";
@@ -10,15 +10,12 @@ import { Allotment } from "allotment";
 import { FileExplorer } from "./file-explorer";
 import EditorView from "@/features/editor/components/editor-view";
 import { PreviewView } from "./preview-view";
-
-
-
+import { ExportPopover } from "./export-popover";
 
 const MIN_SIDEBAR_WIDTH = 200;
 const MAX_SIDEBAR_WIDTH = 800;
 const DEFAULT_SIDEBAR_WIDTH = 350;
 const DEFAULT_MAIN_SIZE = 1000;
-
 
 const Tab = ({
   label,
@@ -62,10 +59,7 @@ const ProjectIdView = ({ projectId }: { projectId: Id<"projects"> }) => {
           }}
         />
         <div className="flex-1 flex justify-end h-full ">
-          <div className="flex items-center gap-1.5 h-full px-3 cursor-pointer text-muted-foreground border-l hover:bg-accent/30">
-            <FaGithub className="size-4 text-muted-foreground" />
-            <span className="text-sm">Export</span>
-          </div>
+          <ExportPopover projectId={projectId} />
         </div>
       </nav>
       <div className="flex-1 relative">
@@ -75,22 +69,18 @@ const ProjectIdView = ({ projectId }: { projectId: Id<"projects"> }) => {
             activeView === "editor" ? "visible" : "invisible",
           )}
         >
-          <Allotment
-          defaultSizes={
-            [DEFAULT_SIDEBAR_WIDTH, DEFAULT_MAIN_SIZE]
-          }>
+          <Allotment defaultSizes={[DEFAULT_SIDEBAR_WIDTH, DEFAULT_MAIN_SIZE]}>
             <Allotment.Pane
-            snap
-            minSize={MIN_SIDEBAR_WIDTH}
-            maxSize={MAX_SIDEBAR_WIDTH}
-            preferredSize={DEFAULT_SIDEBAR_WIDTH}
+              snap
+              minSize={MIN_SIDEBAR_WIDTH}
+              maxSize={MAX_SIDEBAR_WIDTH}
+              preferredSize={DEFAULT_SIDEBAR_WIDTH}
             >
-              <FileExplorer projectId={projectId}/>
+              <FileExplorer projectId={projectId} />
             </Allotment.Pane>
             <Allotment.Pane>
               <EditorView projectId={projectId} />
             </Allotment.Pane>
-
           </Allotment>
         </div>
         <div
@@ -99,7 +89,7 @@ const ProjectIdView = ({ projectId }: { projectId: Id<"projects"> }) => {
             activeView === "preview" ? "visible" : "invisible",
           )}
         >
-          <PreviewView projectId={projectId}/>
+          <PreviewView projectId={projectId} />
         </div>
       </div>
     </div>
