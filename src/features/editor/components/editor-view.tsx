@@ -6,6 +6,7 @@ import FileBreadCrumbs from "./file-breadcrumbs";
 import { useFile, useUpdateFile } from "@/features/projects/hooks/use-file";
 import Image from "next/image";
 import CodeEditor from "./code-editor";
+import BinaryFileView from "./binary-file-view";
 
 const DEBOUNCE_TIME = 1500;
 
@@ -60,7 +61,13 @@ const EditorView = ({ projectId }: { projectId: Id<"projects"> }) => {
           />
         )}
 
-        {isActiveFileBinary && <p>TODO: Implement</p>}
+        {isActiveFileBinary && (
+          <BinaryFileView
+            key={activeFile._id}
+            fileId={activeFile._id}
+            fileName={activeFile.name}
+          />
+        )}
       </div>
     </div>
   );

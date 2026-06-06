@@ -117,7 +117,7 @@ const ProjectsList = ({ onViewAll }: ProjectsListProps) => {
 text-xs hover:text-foreground transition-colors"
               >
                 <span>View All</span>
-                <Kbd className="bg-accent border ">⌘K</Kbd>
+                <Kbd className="bg-accent border ">⌘Q</Kbd>
               </button>
             </div>
           </div>
