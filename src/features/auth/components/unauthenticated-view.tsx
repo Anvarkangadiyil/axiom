@@ -1,15 +1,23 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
+  ArrowRight,
   Bot,
-  Copy,
-  Cpu,
+  BrainCircuit,
+  Code2,
+  Eye,
+  FileCode2,
+  Folder,
+  GitBranch,
+  Globe,
+  Layers,
+  MessageSquare,
   MonitorSmartphone,
-  PlayCircle,
+  Rocket,
   Sparkles,
   Terminal,
-  ToggleLeft,
+  Zap,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { SignInButton } from "@clerk/nextjs";
@@ -20,362 +28,433 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { motion } from "motion/react";
 
-const heroCommands = [
-  "npx create-axiom-app@latest",
-  "axiom agent run \"build auth flow\"",
-  "pnpm dev --webcontainer",
-  "git push origin main",
+/* ------------------------------------------------------------------ */
+/*  Data                                                               */
+/* ------------------------------------------------------------------ */
+
+const heroPrompts = [
+  "Build a full-stack SaaS dashboard",
+  "Create a REST API with auth",
+  "Scaffold a landing page with forms",
+  "Add real-time chat to my app",
 ];
 
 const features = [
   {
     icon: Bot,
-    title: "AI Agent",
-    description: "Autonomous multi-step coding tasks",
-    detail: "Read, write, and run code autonomously",
-    badge: "Powered by Inngest",
-  },
-  {
-    icon: Cpu,
-    title: "WebContainers",
-    description: "Full Node.js runtime in browser - no backend needed",
-    detail: "ShareArrayBuffer support for full Node.js environment",
-  },
-  {
-    icon: Sparkles,
-    title: "CodeMirror 6",
-    description: "Syntax highlighting + minimap + indentation guides",
-    detail: "Inline ghost-text completions powered by Llama 3.1 via Groq",
+    title: "AI Coding Agent",
+    description:
+      "Describe what you want — the agent reads, writes, and executes code autonomously across multiple files.",
+    gradient: "from-violet-500 to-fuchsia-500",
   },
   {
     icon: Terminal,
-    title: "Real Terminal",
-    description: "xterm.js with full npm/pnpm support",
-    detail: "Run scripts and package managers with instant feedback",
+    title: "Built-in Terminal",
+    description:
+      "Run npm, pnpm, or any CLI command right in the browser. Install packages, run scripts, and see output instantly.",
+    gradient: "from-emerald-500 to-teal-500",
+  },
+  {
+    icon: Code2,
+    title: "Smart Code Editor",
+    description:
+      "Syntax highlighting, minimap, indentation guides, and AI-powered inline completions as you type.",
+    gradient: "from-cyan-500 to-blue-500",
+  },
+  {
+    icon: Globe,
+    title: "Live Preview",
+    description:
+      "See your app running in a real browser preview — updated in real time as the agent edits your code.",
+    gradient: "from-amber-500 to-orange-500",
+  },
+  {
+    icon: Folder,
+    title: "Full File Explorer",
+    description:
+      "Browse, create, rename, and delete files and folders. Your project structure, always visible.",
+    gradient: "from-pink-500 to-rose-500",
+  },
+  {
+    icon: MessageSquare,
+    title: "Conversational UI",
+    description:
+      "Chat with the AI in natural language. Ask questions, request changes, or debug — all through conversation.",
+    gradient: "from-sky-500 to-indigo-500",
   },
 ];
 
-const techStack = [
-  "Next.js",
-  "React",
-  "TypeScript",
-  "Tailwind",
-  "Convex",
-  "Clerk",
-  "Groq",
-  "Claude",
-  "WebContainers",
+const howItWorks = [
+  {
+    step: "01",
+    icon: BrainCircuit,
+    title: "Describe Your Idea",
+    description:
+      "Type a prompt like \"Build a todo app with authentication\" and the AI agent starts working immediately.",
+  },
+  {
+    step: "02",
+    icon: FileCode2,
+    title: "Watch It Build",
+    description:
+      "The agent creates files, installs packages, writes code, and runs your project — all in the browser.",
+  },
+  {
+    step: "03",
+    icon: Eye,
+    title: "Preview & Iterate",
+    description:
+      "See the live preview, request changes in chat, and refine your app until it's exactly right.",
+  },
+  {
+    step: "04",
+    icon: Rocket,
+    title: "Ship It",
+    description:
+      "Export your project, push to GitHub, or deploy — your code is real, production-ready, and fully yours.",
+  },
 ];
 
-const codeSample = `import { createAgent } from "@axiom/agent";
+const useCases = [
+  {
+    icon: Layers,
+    title: "Rapid Prototyping",
+    description: "Go from idea to working prototype in minutes, not days.",
+  },
+  {
+    icon: GitBranch,
+    title: "Learn By Building",
+    description: "Watch how the AI structures code and learn best practices in real time.",
+  },
+  {
+    icon: Zap,
+    title: "Automate Boilerplate",
+    description: "Skip repetitive setup. Auth, routing, CRUD — generated instantly.",
+  },
+  {
+    icon: Sparkles,
+    title: "AI Pair Programming",
+    description: "Collaborate with an AI that understands your entire project context.",
+  },
+];
 
-const app = createAgent({
-  model: "llama-3.1",
-  workspace: "webcontainer"
-});
-
-await app.run("Create a production auth flow with protected routes");
-await app.test();
-await app.commit("feat: ship auth flow");
-`;
+/* ------------------------------------------------------------------ */
+/*  Component                                                          */
+/* ------------------------------------------------------------------ */
 
 export const UnAuthenticatedView = () => {
   const [typedText, setTypedText] = useState("");
-  const [commandIndex, setCommandIndex] = useState(0);
+  const [promptIndex, setPromptIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isAIExplainOn, setIsAIExplainOn] = useState(true);
-  const [copied, setCopied] = useState(false);
-  const [marqueeOffset, setMarqueeOffset] = useState(0);
 
   useEffect(() => {
-    const currentCommand = heroCommands[commandIndex];
-    const isDoneTyping = typedText === currentCommand;
+    const currentPrompt = heroPrompts[promptIndex];
+    const isDoneTyping = typedText === currentPrompt;
     const isDoneDeleting = typedText.length === 0;
-    const delay = isDoneTyping ? 1200 : isDeleting ? 45 : 75;
+    const delay = isDoneTyping ? 1800 : isDeleting ? 35 : 65;
 
     const timer = window.setTimeout(() => {
       if (!isDeleting && isDoneTyping) {
         setIsDeleting(true);
         return;
       }
-
       if (isDeleting && isDoneDeleting) {
         setIsDeleting(false);
-        setCommandIndex((prev) => (prev + 1) % heroCommands.length);
+        setPromptIndex((prev) => (prev + 1) % heroPrompts.length);
         return;
       }
-
       setTypedText((prev) =>
         isDeleting
-          ? currentCommand.slice(0, Math.max(0, prev.length - 1))
-          : currentCommand.slice(0, prev.length + 1),
+          ? currentPrompt.slice(0, Math.max(0, prev.length - 1))
+          : currentPrompt.slice(0, prev.length + 1),
       );
     }, delay);
 
     return () => window.clearTimeout(timer);
-  }, [commandIndex, isDeleting, typedText]);
-
-  const marqueeItems = useMemo(() => [...techStack, ...techStack], []);
-
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setMarqueeOffset((prev) => (prev >= 50 ? 0 : prev + 0.2));
-    }, 40);
-
-    return () => window.clearInterval(timer);
-  }, []);
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(codeSample);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1600);
-    } catch {
-      setCopied(false);
-    }
-  };
+  }, [promptIndex, isDeleting, typedText]);
 
   return (
-    <main className="min-h-screen bg-black bg-[radial-gradient(#00F0FF10_1px,transparent_1px)] [background-size:22px_22px] text-[#E0E0E0]">
-      <div className="mx-auto w-full max-w-7xl px-4 pb-16 pt-12 sm:px-8 md:pt-16">
-        <header className="grid items-center gap-10 lg:grid-cols-2">
-          <div>
-            <Badge className="mb-5 border-cyan-500/30 bg-black/50 font-mono text-cyan-400 backdrop-blur-sm">
-              Axiom Cloud IDE
-            </Badge>
-            <h1 className="font-mono text-4xl leading-tight text-cyan-400 sm:text-5xl lg:text-6xl">
-              Build, run, and ship software directly in the browser.
-            </h1>
-            <p className="mt-5 max-w-xl text-base text-gray-300 sm:text-lg">
-              From idea to running code - no local setup required
-            </p>
-            <p className="mt-3 max-w-xl text-sm text-gray-400 sm:text-base">
-              Create apps with AI-native workflows, instant terminals, and deployment-ready
-              projects.
-            </p>
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <SignInButton>
-                <Button className="border border-cyan-400 bg-cyan-400 text-black shadow-[0_0_20px_#00F0FF55] transition hover:shadow-[0_0_10px_#00F0FF]">
-                  Launch Axiom →
-                </Button>
-              </SignInButton>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="border-cyan-500/40 bg-transparent text-cyan-300 hover:bg-cyan-500/10"
-                  >
-                    <PlayCircle className="mr-2 h-4 w-4" />
-                    Watch Demo
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="border-cyan-500/30 bg-zinc-950 text-gray-200">
-                  <DialogHeader>
-                    <DialogTitle className="font-mono text-cyan-400">Axiom Demo</DialogTitle>
-                    <DialogDescription className="text-gray-400">
-                      Preview how Axiom runs AI-assisted coding sessions in the browser.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="rounded-md border border-cyan-500/20 bg-black/60 p-4 font-mono text-sm text-gray-300">
-                    <p className="text-cyan-400">$ axiom demo --play</p>
-                    <p className="mt-2 text-gray-400">
-                      Demo modal ready. Replace this with your product video player.
-                    </p>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </div>
-          </div>
+    <main className="min-h-screen bg-[#050508] text-[#E0E0E0] overflow-x-hidden">
+      {/* Ambient glow background */}
+      <div className="pointer-events-none fixed inset-0 z-0">
+        <div className="absolute left-1/2 top-0 h-[600px] w-[900px] -translate-x-1/2 rounded-full bg-cyan-500/[0.07] blur-[120px]" />
+        <div className="absolute bottom-0 right-0 h-[400px] w-[600px] rounded-full bg-violet-500/[0.05] blur-[100px]" />
+      </div>
 
-          <div className="rounded-lg border border-cyan-500/20 bg-zinc-900/80 p-4 font-mono backdrop-blur-sm">
-            <div className="mb-4 flex items-center gap-2">
-              <span className="h-3 w-3 rounded-full bg-red-500" />
-              <span className="h-3 w-3 rounded-full bg-yellow-500" />
-              <span className="h-3 w-3 rounded-full bg-green-500" />
-              <span className="ml-2 text-xs text-gray-500">terminal</span>
-            </div>
-            <p className="text-sm text-gray-400">user@axiom:~$</p>
-            <p className="mt-2 min-h-7 text-sm text-[#33FF33] sm:text-base">
-              {typedText}
-              <span className="animate-pulse text-cyan-300">█</span>
-            </p>
-          </div>
-        </header>
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 pb-20 pt-12 sm:px-8 md:pt-20">
+        {/* ── Hero ── */}
+        <motion.header
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
+          className="text-center"
+        >
+          <Badge className="mb-6 border-cyan-500/30 bg-cyan-500/10 font-mono text-xs tracking-widest text-cyan-400 backdrop-blur-sm">
+            ✦ AI-Powered Cloud IDE
+          </Badge>
 
-        <section className="mt-14 grid gap-4 sm:grid-cols-2">
-          {features.map((item, index) => {
-            const Icon = item.icon;
-            return (
-              <Card
-                key={item.title}
-                className="group border border-cyan-500/20 bg-zinc-950/50 backdrop-blur-sm transition duration-300 hover:border-cyan-400 hover:shadow-[0_0_24px_#00F0FF22]"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <CardHeader>
-                  <div className="mb-3 flex items-center justify-between">
-                    <div className="rounded-md border border-cyan-500/30 bg-black/50 p-2 text-cyan-300 shadow-[0_0_16px_#00F0FF22] transition group-hover:shadow-[0_0_18px_#00F0FF66]">
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    {item.badge ? (
-                      <Badge className="border-cyan-500/30 bg-black/50 text-cyan-300">
-                        {item.badge}
-                      </Badge>
-                    ) : null}
-                  </div>
-                  <CardTitle className="font-mono text-cyan-400">{item.title}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2 text-sm text-gray-300">
-                  <p>{item.description}</p>
-                  <p className="text-gray-400">{item.detail}</p>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </section>
+          <h1 className="mx-auto max-w-4xl text-4xl font-bold leading-[1.1] tracking-tight sm:text-5xl lg:text-7xl">
+            <span className="bg-gradient-to-b from-white to-gray-400 bg-clip-text text-transparent">
+              Describe it. Build it.
+            </span>
+            <br />
+            <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-violet-400 bg-clip-text text-transparent">
+              Ship it.
+            </span>
+          </h1>
 
-        <section className="mt-14">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-mono text-2xl text-cyan-400">Interactive Code Demo</h2>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleCopy}
-                className="border-cyan-500/30 bg-black/40 text-cyan-300"
-              >
-                <Copy className="mr-2 h-4 w-4" />
-                {copied ? "Copied" : "Copy"}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsAIExplainOn((prev) => !prev)}
-                className={cn(
-                  "border-cyan-500/30 bg-black/40 text-cyan-300",
-                  isAIExplainOn && "shadow-[0_0_10px_#00F0FF55]",
-                )}
-              >
-                <ToggleLeft className="mr-2 h-4 w-4" />
-                AI Explain {isAIExplainOn ? "On" : "Off"}
-              </Button>
-            </div>
-          </div>
-
-          <Tabs defaultValue="typescript" className="rounded-lg border border-cyan-500/20 bg-zinc-950/50 p-4 backdrop-blur-sm">
-            <TabsList className="border border-cyan-500/20 bg-black/50">
-              <TabsTrigger value="typescript" className="text-gray-300 data-[state=active]:text-cyan-300">
-                TypeScript
-              </TabsTrigger>
-              <TabsTrigger value="javascript" className="text-gray-300 data-[state=active]:text-cyan-300">
-                JavaScript
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="typescript" className="mt-4">
-              <div className="grid gap-4 lg:grid-cols-2">
-                <pre className="overflow-x-auto rounded-md border border-cyan-500/20 bg-zinc-900 p-4 font-mono text-xs text-gray-200 sm:text-sm">
-                  <code>{codeSample}</code>
-                </pre>
-                <div className="rounded-md border border-emerald-500/30 bg-black/60 p-4 font-mono text-xs text-emerald-300 sm:text-sm">
-                  <p className="text-emerald-400/70">// AI ghost-text</p>
-                  <p className="mt-2 text-emerald-300/70">
-                    {`// suggest: add middleware for route guards`}
-                  </p>
-                  <p className="text-emerald-300/70">
-                    {`// suggest: scaffold tests for auth flow`}
-                  </p>
-                  {isAIExplainOn ? (
-                    <p className="mt-4 text-gray-400">
-                      AI Explain: This flow creates an agent, executes coding tasks, runs tests,
-                      then commits changes safely.
-                    </p>
-                  ) : null}
-                </div>
-              </div>
-            </TabsContent>
-            <TabsContent value="javascript" className="mt-4">
-              <div className="rounded-md border border-cyan-500/20 bg-zinc-900 p-4 font-mono text-sm text-gray-300">
-                <p className="text-cyan-300">// JavaScript example mirrors TypeScript workflow.</p>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </section>
-
-        <section className="mt-14 overflow-hidden rounded-lg border border-cyan-500/20 bg-black/40 py-4">
-          <div
-            className="flex w-max whitespace-nowrap"
-            style={{ transform: `translateX(-${marqueeOffset}%)` }}
-          >
-            {marqueeItems.map((tech, idx) => (
-              <Badge
-                key={`${tech}-${idx}`}
-                className="mx-2 border-cyan-500/30 bg-black/50 px-3 py-1 text-cyan-300 backdrop-blur-sm"
-              >
-                {tech}
-              </Badge>
-            ))}
-          </div>
-        </section>
-
-        <section className="mt-14 grid gap-4 md:grid-cols-3">
-          {[
-            "1. Open in Browser → no install",
-            "2. AI Writes Code → agent helps build",
-            "3. Run & Ship → WebContainers execute",
-          ].map((step) => (
-            <Card key={step} className="border border-cyan-500/20 bg-zinc-950/50 backdrop-blur-sm">
-              <CardContent className="pt-6 font-mono text-cyan-300">{step}</CardContent>
-            </Card>
-          ))}
-        </section>
-
-        <section className="mt-14 rounded-lg border border-cyan-500/20 bg-zinc-950/40 p-6 font-mono backdrop-blur-sm">
-          <h2 className="mb-4 text-xl text-cyan-400">Developer Logs</h2>
-          <p className="text-gray-300">{`$ echo "Best cloud IDE ever" --user @devloper`}</p>
-          <p className="mt-2 text-gray-400">{`$ echo "Shipped MVP in one afternoon" --user @frontendace`}</p>
-        </section>
-
-        <section className="mt-14 rounded-lg border border-cyan-500/30 bg-zinc-900/50 p-8 text-center shadow-[0_0_30px_#00F0FF22] backdrop-blur-sm">
-          <h2 className="font-mono text-3xl text-cyan-400">Ready to Code Without Setup?</h2>
-          <p className="mt-3 text-gray-300">Free tier includes 100k AI tokens/month</p>
-          <SignInButton>
-            <Button className="mt-6 border border-cyan-400 bg-cyan-400 px-8 py-6 text-base text-black shadow-[0_0_18px_#00F0FF88] transition hover:shadow-[0_0_10px_#00F0FF]">
-              Start Coding Now →
-            </Button>
-          </SignInButton>
-          <p className="mt-3 text-xs text-gray-400">No credit card required</p>
-        </section>
-
-        <footer className="mt-16 border-t border-cyan-500/20 pt-6 font-mono text-sm">
-          <p className="text-[#33FF33]">$ npx create-axiom-app</p>
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-gray-400">
-            <p className="text-[#33FF33]">© {new Date().getFullYear()} Axiom. All rights reserved.</p>
-            <div className="flex items-center gap-4">
-              <a href="#" className="text-cyan-300 hover:text-cyan-200">
-                {"> about"}
-              </a>
-              <a href="#" className="text-cyan-300 hover:text-cyan-200">
-                {"> privacy"}
-              </a>
-              <a href="#" className="text-cyan-300 hover:text-cyan-200">
-                {"> terms"}
-              </a>
-            </div>
-          </div>
-          <p className="mt-3 flex items-center gap-2 text-xs text-gray-500">
-            <MonitorSmartphone className="h-3.5 w-3.5" />
-            Responsive on mobile, tablet, and desktop.
+          <p className="mx-auto mt-6 max-w-2xl text-base text-gray-400 sm:text-lg">
+            Axiom is a browser-based IDE with an AI coding agent that builds entire
+            applications from a single prompt. No local setup. No boilerplate. Just results.
           </p>
+
+          {/* Interactive prompt demo */}
+          <div className="mx-auto mt-10 max-w-2xl">
+            <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-1 backdrop-blur-sm">
+              <div className="flex items-center gap-3 rounded-lg bg-black/60 px-5 py-4">
+                <Sparkles className="h-5 w-5 shrink-0 text-cyan-400" />
+                <span className="min-h-[1.5rem] flex-1 text-left font-mono text-sm text-gray-300 sm:text-base">
+                  {typedText}
+                  <span className="ml-0.5 inline-block animate-pulse text-cyan-400">|</span>
+                </span>
+                <SignInButton>
+                  <Button
+                    size="sm"
+                    className="shrink-0 border border-cyan-400/50 bg-cyan-400 px-4 text-sm font-semibold text-black shadow-[0_0_20px_#00F0FF33] transition-shadow hover:shadow-[0_0_30px_#00F0FF55]"
+                  >
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </SignInButton>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+            <SignInButton>
+              <Button className="h-12 rounded-xl border border-cyan-400/50 bg-cyan-400 px-8 text-base font-semibold text-black shadow-[0_0_24px_#00F0FF44] transition-all hover:scale-[1.02] hover:shadow-[0_0_32px_#00F0FF66]">
+                Start Building — It&apos;s Free
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </SignInButton>
+          </div>
+
+          <p className="mt-4 text-xs text-gray-500">
+            No credit card required · Free tier available
+          </p>
+        </motion.header>
+
+        {/* ── Features ── */}
+        <section className="mt-28">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.5 }}
+            className="text-center"
+          >
+            <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+              Everything you need to build
+            </h2>
+            <p className="mx-auto mt-3 max-w-xl text-gray-400">
+              A complete development environment that lives in your browser — powered by AI.
+            </p>
+          </motion.div>
+
+          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {features.map((feature, index) => {
+              const Icon = feature.icon;
+              return (
+                <motion.div
+                  key={feature.title}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.45, delay: index * 0.08 }}
+                >
+                  <Card className="group relative h-full overflow-hidden border border-white/[0.06] bg-white/[0.02] backdrop-blur-sm transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.04]">
+                    {/* Gradient hover glow */}
+                    <div
+                      className={cn(
+                        "absolute -right-8 -top-8 h-24 w-24 rounded-full bg-gradient-to-br opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-20",
+                        feature.gradient,
+                      )}
+                    />
+                    <CardHeader className="pb-3">
+                      <div
+                        className={cn(
+                          "mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br",
+                          feature.gradient,
+                        )}
+                      >
+                        <Icon className="h-5 w-5 text-white" />
+                      </div>
+                      <CardTitle className="text-lg font-semibold text-white">
+                        {feature.title}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm leading-relaxed text-gray-400">
+                        {feature.description}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* ── How It Works ── */}
+        <section className="mt-28">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.5 }}
+            className="text-center"
+          >
+            <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+              How it works
+            </h2>
+            <p className="mx-auto mt-3 max-w-xl text-gray-400">
+              Four steps from idea to production — all inside your browser.
+            </p>
+          </motion.div>
+
+          <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {howItWorks.map((item, index) => {
+              const Icon = item.icon;
+              return (
+                <motion.div
+                  key={item.step}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.45, delay: index * 0.1 }}
+                  className="relative"
+                >
+                  <div className="flex h-full flex-col rounded-xl border border-white/[0.06] bg-white/[0.02] p-6 backdrop-blur-sm">
+                    <span className="mb-4 font-mono text-3xl font-bold text-cyan-500/30">
+                      {item.step}
+                    </span>
+                    <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg border border-cyan-500/20 bg-cyan-500/10">
+                      <Icon className="h-4.5 w-4.5 text-cyan-400" />
+                    </div>
+                    <h3 className="mb-2 text-base font-semibold text-white">
+                      {item.title}
+                    </h3>
+                    <p className="text-sm leading-relaxed text-gray-400">
+                      {item.description}
+                    </p>
+                  </div>
+                  {/* Connector line (hidden on last + mobile) */}
+                  {index < howItWorks.length - 1 && (
+                    <div className="absolute right-0 top-1/2 hidden h-px w-6 translate-x-full bg-gradient-to-r from-cyan-500/30 to-transparent lg:block" />
+                  )}
+                </motion.div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* ── Use Cases ── */}
+        <section className="mt-28">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.5 }}
+            className="text-center"
+          >
+            <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+              Built for every developer
+            </h2>
+            <p className="mx-auto mt-3 max-w-xl text-gray-400">
+              Whether you&apos;re prototyping, learning, or shipping — Axiom adapts to your workflow.
+            </p>
+          </motion.div>
+
+          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {useCases.map((item, index) => {
+              const Icon = item.icon;
+              return (
+                <motion.div
+                  key={item.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.4, delay: index * 0.08 }}
+                  className="group rounded-xl border border-white/[0.06] bg-white/[0.02] p-5 backdrop-blur-sm transition-all duration-300 hover:border-cyan-500/20 hover:bg-cyan-500/[0.03]"
+                >
+                  <Icon className="mb-3 h-6 w-6 text-cyan-400 transition-transform duration-300 group-hover:scale-110" />
+                  <h3 className="mb-1 text-sm font-semibold text-white">{item.title}</h3>
+                  <p className="text-xs leading-relaxed text-gray-400">{item.description}</p>
+                </motion.div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* ── CTA ── */}
+        <motion.section
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.5 }}
+          className="mt-28"
+        >
+          <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-cyan-500/[0.08] via-transparent to-violet-500/[0.06] p-10 text-center backdrop-blur-sm sm:p-14">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,#00F0FF15,transparent_70%)]" />
+            <h2 className="relative text-3xl font-bold tracking-tight text-white sm:text-4xl">
+              Ready to build something amazing?
+            </h2>
+            <p className="relative mx-auto mt-4 max-w-lg text-gray-400">
+              Join developers who are shipping faster with AI. Start building
+              your next project in seconds.
+            </p>
+            <SignInButton>
+              <Button className="relative mt-8 h-12 rounded-xl border border-cyan-400/50 bg-cyan-400 px-10 text-base font-semibold text-black shadow-[0_0_30px_#00F0FF44] transition-all hover:scale-[1.02] hover:shadow-[0_0_40px_#00F0FF66]">
+                Get Started Free
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </SignInButton>
+            <p className="relative mt-4 text-xs text-gray-500">
+              No credit card required
+            </p>
+          </div>
+        </motion.section>
+
+        {/* ── Footer ── */}
+        <footer className="mt-20 border-t border-white/[0.06] pt-8">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-cyan-400 to-blue-500">
+                <Zap className="h-4 w-4 text-white" />
+              </div>
+              <span className="text-sm font-semibold text-white">Axiom</span>
+            </div>
+            <div className="flex items-center gap-5 text-xs text-gray-500">
+              <a href="#" className="transition-colors hover:text-gray-300">
+                About
+              </a>
+              <a href="#" className="transition-colors hover:text-gray-300">
+                Privacy
+              </a>
+              <a href="#" className="transition-colors hover:text-gray-300">
+                Terms
+              </a>
+            </div>
+          </div>
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-3 text-xs text-gray-600">
+            <p>© {new Date().getFullYear()} Axiom. All rights reserved.</p>
+            <p className="flex items-center gap-1.5">
+              <MonitorSmartphone className="h-3.5 w-3.5" />
+              Works on desktop, tablet &amp; mobile
+            </p>
+          </div>
         </footer>
       </div>
     </main>
