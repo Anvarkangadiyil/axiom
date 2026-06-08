@@ -1,5 +1,7 @@
-import { createOpenRouter } from '@openrouter/ai-sdk-provider';
+import { createOpenAI } from "@ai-sdk/openai";
 
-export const openrouter = createOpenRouter({
-  apiKey: process.env.OPEN_ROUTER_AI_API_KEY,
+export const groq = createOpenAI({
+  apiKey: process.env.GROQ_API_KEY,
+  baseURL: "https://api.groq.com/openai/v1",
 });
+

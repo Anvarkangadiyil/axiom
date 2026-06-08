@@ -24,7 +24,7 @@ Axiom is a full-featured cloud IDE that runs entirely in the browser. It pairs a
 - **One Dark theme** — Easy on the eyes out of the box
  
 ### 🤖 AI
-- **AI Suggestions** — Inline ghost-text completions as you type, powered by `llama-3.1-8b-instant` via Groq — similar to GitHub Copilot
+- **AI Suggestions** — Inline ghost-text completions as you type, powered by `llama-3.3-70b-versatile` via Groq — similar to GitHub Copilot
 - **Quick Edit** — Select any block of code, type a prompt, and Axiom rewrites the selection in place — powered by `openai/gpt-oss-20b` via OpenRouter
 - **AI Agent** — Autonomous multi-step coding tasks powered by Inngest AgentKit; the agent can read, write, and run code to complete complex goals
 - **Streaming responses** — Markdown, code blocks, math equations, and Mermaid diagrams rendered as they stream in real time

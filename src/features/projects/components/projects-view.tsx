@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import ProjectsCommandDialog from "./projects-command-dialog";
 import { ImportGithubDialog } from "./import-github-dialog";
+import { NewProjectDialog } from "./new-project-dialog";
 
 const font = Poppins({
   subsets: ["latin"],
@@ -30,26 +31,28 @@ const ProjectView = () => {
 
   const [commandDialogOpen, setCommandDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [newProjectDialogOpen, setNewProjectDialogOpen] = useState(false);
 
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.metaKey || event.ctrlKey) {
-        if (event.key === "q") {
-          event.preventDefault();
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey) {
+        if (e.key === "k") {
+          e.preventDefault();
           setCommandDialogOpen(true);
         }
-        if (event.key === "i") {
-          event.preventDefault();
+        if (e.key === "i") {
+          e.preventDefault();
           setImportDialogOpen(true);
         }
+        if (e.key === "j") {
+          e.preventDefault();
+          setNewProjectDialogOpen(true);
+        }
       }
-    };
+    }
 
     document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   return (
@@ -61,6 +64,11 @@ const ProjectView = () => {
       <ImportGithubDialog
         open={importDialogOpen}
         onOpenChange={setImportDialogOpen}
+      />
+
+      <NewProjectDialog
+        open={newProjectDialogOpen}
+        onOpenChange={setNewProjectDialogOpen}
       />
       <div className="min-h-screen bg-sidebar flex flex-col items-center justify-center p-6 md:p-6">
         <div className="w-full max-w-sm mx-auto flex-col gap-4 items-center">
@@ -86,16 +94,7 @@ const ProjectView = () => {
             <div className="grid grid-cols-2 gap-2">
               <Button
                 variant={"outline"}
-                onClick={() => {
-                  const name = uniqueNamesGenerator({
-                    dictionaries: [adjectives, animals, colors],
-                    separator: "-",
-                    length: 3,
-                  });
-                  createProject({
-                    name: name,
-                  });
-                }}
+                onClick={() => setNewProjectDialogOpen(true)}
                 className="h-full  items-start justify-start p-4 bg-background border flex flex-col rounded-none"
               >
                 <div className="flex items-center justify-between w-full">
