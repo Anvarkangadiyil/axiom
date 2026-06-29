@@ -23,6 +23,9 @@ const plexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: "Axiom | AI-Powered Cloud IDE & Autonomous Agent",
   description: "Write, run, and ship full-stack applications in your browser. Axiom features a powerful editor, in-browser Node.js runtime via WebContainers, real-time preview, and an autonomous AI coding agent. No local setup required.",
+  icons: {
+    icon: "/logo.svg",
+  },
   keywords: [
     "AI coding agent",
     "cloud IDE",

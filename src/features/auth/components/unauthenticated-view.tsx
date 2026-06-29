@@ -196,9 +196,7 @@ export const UnAuthenticatedView = () => {
       <nav className="sticky top-0 z-50 w-full border-b border-white/[0.06] bg-black/40 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-8">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-red-500 to-rose-600 shadow-[0_0_15px_rgba(239,68,68,0.4)]">
-              <Zap className="h-5 w-5 text-white fill-white/10" />
-            </div>
+            <img src="/logo.svg" className="h-9 w-9" alt="Axiom Logo" />
             <span className="text-xl font-extrabold tracking-tight text-white bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
               Axiom
             </span>
@@ -803,9 +801,7 @@ export const UnAuthenticatedView = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
             <div className="space-y-4">
               <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-red-500 to-rose-600">
-                  <Zap className="h-4.5 w-4.5 text-white" />
-                </div>
+                <img src="/logo.svg" className="h-8 w-8" alt="Axiom Logo" />
                 <span className="text-lg font-extrabold tracking-tight text-white">Axiom</span>
               </div>
               <p className="text-xs text-zinc-500 leading-relaxed">
